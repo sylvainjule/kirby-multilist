@@ -22,7 +22,7 @@ This plugin helps dealing with long lists with multiple fields.
 
 Download and copy this repository to ```/site/plugins/multilist```
 
-Alternatively, you can install it with composer: ```composer require sylvainjule/multilist```
+Alternatively, you can install it with composer: ```composer require sylvainjule/kirby-multilist```
 
 <br/>
 
