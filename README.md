@@ -14,7 +14,9 @@ This plugin helps dealing with long lists with multiple fields.
 - [2. Setup](#2-setup)
 - [3. Supported fields](#3-field-types)
 - [4. Field properties](#4-field-properties)
-- [5. License](#5-license)
+- [5. Front-end usage](#5-front-end-usage)
+- [6. Drawbacks](#6-drawbacks)
+- [7. License](#7-license)
 
 ## 1. Installation
 
@@ -76,6 +78,18 @@ You have access to a lot of the [Structure field properties](https://getkirby.co
 
 <br/>
 
-## 5. License
+## 5. Front-end usage
+
+Use it as you would use a structure field, with either the `->toStructure()` ou `->yaml()` method.
+
+<br/>
+
+## 6. Drawbacks
+
+I have intended this field for websites where editors edit content on desktops. Due to the complex naure of the field, it doesn't have any mobile aternate view.
+
+<br/>
+
+## 7. License
 
 MIT
