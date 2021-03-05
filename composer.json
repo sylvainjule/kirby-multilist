@@ -1,5 +1,5 @@
 {
-    "name": "sylvainjule/multilist",
+    "name": "sylvainjule/kirby-multilist",
     "description": "Quickly manage lists with multiple fields in Kirby",
     "type": "kirby-plugin",
     "license": "MIT",
