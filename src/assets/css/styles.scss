@@ -1,0 +1,97 @@
+$shadow: 0 1px 3px 0 rgba(black, 0.1), 0 1px 2px 0 rgba(black, 0.06);
+$breakpoint-md: 65em;
+
+
+.k-multilist-table {
+    .k-multilist-item {
+        .k-field-header {
+            display: none;
+        }
+        .multilist-field {
+            overflow: visible;
+            .k-input {
+                position: relative;
+                &:not(:focus-within) {
+                    border: 1px solid transparent;
+                }
+                &:focus-within {
+                    outline: none;
+                    z-index: 1;
+                    box-shadow: #d0dceb 0 0 0 2px;
+                }
+                &[data-invalid] {
+                    border: 1px solid rgba(#c82829, 1);
+                    box-shadow: none;
+                    &:focus-within {
+                        border-color: #c82829;
+                        outline: none;
+                        box-shadow: #f2cacb 0 0 0 2px !important;
+                    }
+                }
+            }
+        }
+    }
+
+    /* Fix for structure styles interfering with the calendar styles */
+    .k-calendar-input th,
+    .k-calendar-input td {
+        border: none;
+        background: none !important;
+        overflow: visible;
+    }
+    .k-calendar-input th {
+        position: relative;
+        padding: .5rem 0;
+        height: auto;
+        color: #999;
+        font-size: .75rem;
+        font-weight: 400;
+        text-align: center;
+        line-height: 0;
+    }
+    .k-calendar-today {
+        line-height: 0;
+    }
+
+    /* handle */
+    &[data-sortable] {
+        tr:hover {
+            .k-structure-table-index {
+                &.disabled {
+                    .k-structure-table-index-number {
+                        display: block !important;
+                    }
+                    .k-sort-handle {
+                        display: none !important;
+                    }
+                }
+                &:not(.disabled) {
+                    .k-structure-table-index-column {
+                        display: none !important;
+                    }
+                    .k-sort-handle {
+                        display: flex !important;
+                    }
+                }
+            }
+        }
+    }
+}
+
+/* mobile */
+.k-structure-table.k-multilist-table {
+    @media screen and (max-width: $breakpoint-md) {
+        td,
+        th {
+          display: table-cell;
+        }
+        th:first-child,
+        th:nth-child(2),
+        th:last-child,
+        td:first-child,
+        td:nth-child(2),
+        td:last-child {
+          display: table-cell;
+        }
+    }
+}
