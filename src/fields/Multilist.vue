@@ -13,8 +13,8 @@
             <thead>
                 <tr>
                     <th class="k-structure-table-index">#</th>
-                    <th v-for="(field, index) in fields" :key="index" class="k-structure-table-column" :style="'width:' + width(field.width)">
-                        {{ field.label }}<span v-if="field.required">*</span>
+                    <th v-for="(column, columnName) in columns" :key="index" class="k-structure-table-column" :style="'width:' + width(fields[columnName].width)">
+                        {{ fields[columnName].label }}<span v-if="fields[columnName].required">*</span>
                     </th>
                     <th></th>
                 </tr>
@@ -27,17 +27,17 @@
                         <div class="k-structure-table-index-number">{{ index + 1 }}</div>
                     </td>
 
-                    <td v-for="(field, key) in fields" :key="key" class="k-structure-table-column multilist-field">
+                    <td v-for="(column, columnName) in columns" :key="columnName" class="k-structure-table-column multilist-field">
                         <component
-                              :is="'k-' + field.type + '-field'"
-                              v-if="hasFieldType(field.type)"
-                              :ref="'list-'+ field.name +'-'+ index"
-                              v-model="localValue[index][key]"
-                              :name="key"
+                              :is="'k-' + fields[columnName].type + '-field'"
+                              v-if="hasFieldType(fields[columnName].type)"
+                              :ref="'list-'+ fields[columnName].name +'-'+ index"
+                              v-model="localValue[index][columnName]"
+                              :name="columnName"
                               :novalidate="novalidate"
                               :disabled="disabled"
-                              v-bind="field"
-                              @input="onColumnInput(index, key, $event)"
+                              v-bind="fields[columnName]"
+                              @input="onColumnInput(index, columnName, $event)"
                             />
                     </td>
 
@@ -58,6 +58,7 @@
 <script>
 export default {
     props: {
+        columns: Object,
         label: String,
         disabled: Boolean,
         help: String,
