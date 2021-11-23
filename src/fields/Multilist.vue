@@ -158,7 +158,7 @@ export default {
         },
         setFocus() {
             let index   = this.prepend && !this.autoAdd ? 0 : this.lastIndex
-            let ref     = 'list-'+ Object.keys(this.fields)[0] +'-'+ index
+            let ref     = 'list-'+ Object.keys(this.columns)[0] +'-'+ index
             let focusOn = this.$refs[ref]
 
             if(focusOn) focusOn[0].focus()
