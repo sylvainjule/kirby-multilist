@@ -3,6 +3,8 @@ $breakpoint-md: 65em;
 
 
 .k-multilist-table {
+    --item-height: 38px;
+
     .k-multilist-item {
         .k-field-header {
             display: none;

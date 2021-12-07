@@ -64,6 +64,7 @@ The field supports all *inline* field types:
 - `toggle`
 - `time`
 - `date`
+- `hidden`
 
 More complex fields (files, pages, blocks, layout, etc.) **are not supported**.
 
