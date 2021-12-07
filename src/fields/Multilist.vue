@@ -37,6 +37,8 @@
                               :novalidate="novalidate"
                               :disabled="disabled"
                               v-bind="fields[columnName]"
+                              @keydown.shift.enter.prevent="addItem"
+                              @keyup="onKeyup(index, columnName, fields[columnName], $event)"
                               @input="onColumnInput(index, columnName, $event)"
                             />
                     </td>
@@ -176,6 +178,33 @@ export default {
         },
         onInput() {
             this.$emit('input', this.localValue)
+        },
+        onKeyup(index, key, field, event) {
+            let changeFocus = false
+            const checkUpDown = ['text', 'url', 'email', 'tel'].indexOf(field.type) > -1
+            const checkLeftRight = ['number', 'select', 'multiselect'].indexOf(field.type) > -1
+            const checkLeftRightWithCaret = ['text', 'url', 'email', 'tel'].indexOf(field.type) > -1
+            const caretAtStart = event.target.selectionStart == 0
+            const caretAtEnd = event.target.selectionStart == event.target.value.length
+
+            if(checkUpDown && (event.key == 'ArrowDown' || event.key == 'ArrowUp')) {
+                index += event.key == 'ArrowDown' ? 1 : -1
+                changeFocus = true
+            }
+
+            if(event.key == 'ArrowLeft' && (checkLeftRight || checkLeftRightWithCaret && caretAtStart) ||
+               event.key == 'ArrowRight' && (checkLeftRight || checkLeftRightWithCaret && caretAtEnd) ) {
+                let keys = Object.keys(this.fields)
+                key = keys[keys.indexOf(key) + (event.key == 'ArrowRight' ? 1 : -1)]
+                changeFocus = true
+            }
+
+            if(changeFocus) {
+                let ref = 'list-'+ key +'-'+ index
+                let focusOn = this.$refs[ref]
+
+                if(focusOn && focusOn[0]) focusOn[0].focus()
+            }
         },
         isLast(index) {
             return this.localValue && this.localValue.length > 1 && index + 1 === this.localValue.length
