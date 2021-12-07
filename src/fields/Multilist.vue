@@ -6,7 +6,7 @@
             </k-button>
         </template>
 
-        <k-empty v-if="isEmpty" icon="list-bullet">
+        <k-empty v-if="isEmpty" icon="list-bullet" @click="addItem">
             {{ empty || $t("field.structure.empty") }}
         </k-empty>
         <table v-else :data-sortable="isSortable" class="k-structure-table k-multilist-table">
