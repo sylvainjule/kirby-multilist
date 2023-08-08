@@ -9,51 +9,53 @@
         <k-empty v-if="isEmpty" icon="list-bullet" @click="addItem">
             {{ empty || $t("field.structure.empty") }}
         </k-empty>
-        <table v-else :data-sortable="isSortable" class="k-table k-multilist-table">
-            <thead>
-                <tr>
-                    <th class="k-table-index-column">#</th>
-                    <th v-for="(column, columnName) in columns" :key="index" class="k-table-column" :style="'width:' + width(fields[columnName].width)">
-                        {{ fields[columnName].label }}<span v-if="fields[columnName].required">*</span>
-                    </th>
-                    <th class="k-table-options-column"></th>
-                </tr>
-            </thead>
+        <div v-else class="k-table k-multilist-table">
+            <table :data-sortable="isSortable">
+                <thead>
+                    <tr>
+                        <th class="k-table-index-column">#</th>
+                        <th v-for="(column, columnName) in columns" :key="index" class="k-table-column" :style="'width:' + width(fields[columnName].width)">
+                            {{ fields[columnName].label }}<span v-if="fields[columnName].required">*</span>
+                        </th>
+                        <th class="k-table-options-column"></th>
+                    </tr>
+                </thead>
 
-            <k-draggable :list="localValue" :handle="true" element="tbody" class="k-multilist-list" :options="dragOptions" @end="onInput">
-                <tr v-for="(item, index) in localValue" :key="index" class="k-multilist-item">
-                    <td :class="['k-table-index-column', {'disabled': isLast(index) }]" :data-sortable="isSortable && !isLast(index)">
-                        <div class="k-table-index">{{ index + 1 }}</div>
-                        <k-sort-handle v-if="isSortable && !isLast(index)" />
-                    </td>
+                <k-draggable :list="localValue" :handle="true" element="tbody" class="k-multilist-list" :options="dragOptions" @end="onInput">
+                    <tr v-for="(item, index) in localValue" :key="index" class="k-multilist-item">
+                        <td :class="['k-table-index-column', {'disabled': isLast(index) }]" :data-sortable="isSortable && !isLast(index)">
+                            <div class="k-table-index">{{ index + 1 }}</div>
+                            <k-sort-handle v-if="isSortable && !isLast(index)" />
+                        </td>
 
-                    <td v-for="(column, columnName) in columns" :key="columnName" class="k-table-column multilist-field">
-                        <component
-                              :is="'k-' + fields[columnName].type + '-field'"
-                              v-if="hasFieldType(fields[columnName].type)"
-                              :ref="'list-'+ fields[columnName].name +'-'+ index"
-                              v-model="localValue[index][columnName]"
-                              :name="columnName"
-                              :novalidate="novalidate"
-                              :disabled="disabled"
-                              v-bind="fields[columnName]"
-                              @keydown.shift.enter.prevent="addItem"
-                              @keyup="onKeyup(index, columnName, fields[columnName], $event)"
-                              @input="onColumnInput(index, columnName, $event)"
+                        <td v-for="(column, columnName) in columns" :key="columnName" class="k-table-column multilist-field">
+                            <component
+                                  :is="'k-' + fields[columnName].type + '-field'"
+                                  v-if="hasFieldType(fields[columnName].type)"
+                                  :ref="'list-'+ fields[columnName].name +'-'+ index"
+                                  v-model="localValue[index][columnName]"
+                                  :name="columnName"
+                                  :novalidate="novalidate"
+                                  :disabled="disabled"
+                                  v-bind="fields[columnName]"
+                                  @keydown.shift.enter.prevent="addItem"
+                                  @keyup="onKeyup(index, columnName, fields[columnName], $event)"
+                                  @input="onColumnInput(index, columnName, $event)"
+                                />
+                        </td>
+
+                        <td :class="['k-table-options-column', {'disabled': isLast(index) }]">
+                            <k-button
+                              :tooltip="$t('remove')"
+                              class="k-table-options-button"
+                              icon="remove"
+                              @click="removeItem(index)"
                             />
-                    </td>
-
-                    <td :class="['k-table-options-column', {'disabled': isLast(index) }]">
-                        <k-button
-                          :tooltip="$t('remove')"
-                          class="k-table-options-button"
-                          icon="remove"
-                          @click="removeItem(index)"
-                        />
-                    </td>
-                </tr>
-            </k-draggable>
-        </table>
+                        </td>
+                    </tr>
+                </k-draggable>
+            </table>
+        </div>
     </k-field>
 </template>
 
