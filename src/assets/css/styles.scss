@@ -3,19 +3,30 @@ $breakpoint-md: 65em;
 
 
 .k-multilist-table {
-    --item-height: 38px;
-
     .k-multilist-item {
         .k-field-header {
             display: none;
         }
+        td {
+            border-inline-end: none !important;
+            border-block-end: none !important;
+        }
+        td:not(:first-child) {
+            border-inline-start: 1px solid var(--color-background);
+        }
+        &:not(:first-child) td {
+            border-block-start: 1px solid var(--color-background);
+        }
+        &:hover .multilist-field {
+            background: none;
+        }
         .multilist-field {
             overflow: visible;
+            vertical-align: top;
             .k-input {
                 position: relative;
-                &:not(:focus-within) {
-                    border: 1px solid transparent;
-                }
+                border-radius: 0;
+                outline: none;
                 &:focus-within {
                     outline: none;
                     z-index: 1;
@@ -30,6 +41,9 @@ $breakpoint-md: 65em;
                         box-shadow: #f2cacb 0 0 0 2px !important;
                     }
                 }
+            }
+            .k-text-input {
+                border-radius: 0;
             }
         }
     }
@@ -54,34 +68,10 @@ $breakpoint-md: 65em;
     .k-calendar-today {
         line-height: 0;
     }
-
-    /* handle */
-    &[data-sortable] {
-        tr:hover {
-            .k-structure-table-index {
-                &.disabled {
-                    .k-structure-table-index-number {
-                        display: block !important;
-                    }
-                    .k-sort-handle {
-                        display: none !important;
-                    }
-                }
-                &:not(.disabled) {
-                    .k-structure-table-index-column {
-                        display: none !important;
-                    }
-                    .k-sort-handle {
-                        display: flex !important;
-                    }
-                }
-            }
-        }
-    }
 }
 
 /* mobile */
-.k-structure-table.k-multilist-table {
+.k-table.k-multilist-table {
     @media screen and (max-width: $breakpoint-md) {
         td,
         th {
