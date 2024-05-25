@@ -24,7 +24,7 @@
                 <k-draggable :list="localValue" :handle="true" element="tbody" class="k-multilist-list" :options="dragOptions" @end="onInput">
                     <tr v-for="(item, index) in localValue" :key="index" class="k-multilist-item">
                         <td :class="['k-table-index-column', {'disabled': isLast(index) }]" :data-sortable="isSortable && !isLast(index)" data-mobile="true">
-                            <div class="k-table-index">{{ index + 1 }}</div>
+                            <div class="k-table-index">{{ index + 1 }}</div>
                             <k-sort-handle v-if="isSortable && !isLast(index)" />
                         </td>
 
@@ -115,10 +115,10 @@ export default {
             return !this.localValue || !this.localValue.length
         },
         canAdd() {
-            return !this.limit || !this.localValue || !this.localValue.length || this.localValue.length < this.limit
+            return !this.limit || !this.localValue || !this.localValue.length || this.localValue.length < this.limit
         },
         isSortable() {
-            return this.sortable && this.localValue.length > 1
+            return this.sortable && this.localValue.length > 1 && (!this.sortBy || !this.sortBy.length)
         },
         defaultItem() {
             let data = {}
