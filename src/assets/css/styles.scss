@@ -8,6 +8,7 @@ $breakpoint-md: 65em;
             display: none;
         }
         td {
+            padding-inline: 0;
             border-inline-end: none !important;
             border-block-end: none !important;
         }

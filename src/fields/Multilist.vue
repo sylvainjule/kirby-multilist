@@ -13,22 +13,22 @@
             <table :data-sortable="isSortable">
                 <thead>
                     <tr>
-                        <th class="k-table-index-column">#</th>
-                        <th v-for="(column, columnName) in columns" :key="index" class="k-table-column" :style="'width:' + width(fields[columnName].width)">
+                        <th class="k-table-index-column" data-mobile="true">#</th>
+                        <th v-for="(column, columnName) in columns" :key="index" class="k-table-column" :style="'width:' + width(fields[columnName].width)" :data-mobile="column.mobile">
                             {{ fields[columnName].label }}<span v-if="fields[columnName].required">*</span>
                         </th>
-                        <th class="k-table-options-column"></th>
+                        <th class="k-table-options-column" data-mobile="true"></th>
                     </tr>
                 </thead>
 
                 <k-draggable :list="localValue" :handle="true" element="tbody" class="k-multilist-list" :options="dragOptions" @end="onInput">
                     <tr v-for="(item, index) in localValue" :key="index" class="k-multilist-item">
-                        <td :class="['k-table-index-column', {'disabled': isLast(index) }]" :data-sortable="isSortable && !isLast(index)">
+                        <td :class="['k-table-index-column', {'disabled': isLast(index) }]" :data-sortable="isSortable && !isLast(index)" data-mobile="true">
                             <div class="k-table-index">{{ index + 1 }}</div>
                             <k-sort-handle v-if="isSortable && !isLast(index)" />
                         </td>
 
-                        <td v-for="(column, columnName) in columns" :key="columnName" class="k-table-column multilist-field">
+                        <td v-for="(column, columnName) in columns" :key="columnName" class="k-table-column multilist-field" :data-mobile="column.mobile">
                             <component
                                   :is="'k-' + fields[columnName].type + '-field'"
                                   v-if="hasFieldType(fields[columnName].type)"
@@ -44,7 +44,7 @@
                                 />
                         </td>
 
-                        <td :class="['k-table-options-column', {'disabled': isLast(index) }]">
+                        <td :class="['k-table-options-column', {'disabled': isLast(index) }]" data-mobile="true">
                             <k-button
                               :tooltip="$t('remove')"
                               class="k-table-options-button"
