@@ -1,90 +1,88 @@
-$shadow: 0 1px 3px 0 rgba(black, 0.1), 0 1px 2px 0 rgba(black, 0.06);
-$breakpoint-md: 65em;
-
-
 .k-multilist-table {
-    .k-multilist-item {
-        .k-field-header {
-            display: none;
-        }
-        td {
-            padding-inline: 0;
-            border-inline-end: none !important;
-            border-block-end: none !important;
-        }
-        td:not(:first-child) {
-            border-inline-start: 1px solid var(--color-background);
-        }
-        &:not(:first-child) td {
-            border-block-start: 1px solid var(--color-background);
-        }
-        &:hover .multilist-field {
-            background: none;
-        }
-        .multilist-field {
-            overflow: visible;
-            vertical-align: top;
-            .k-input {
-                position: relative;
-                border-radius: 0;
-                outline: none;
-                &:focus-within {
-                    outline: none;
-                    z-index: 1;
-                    box-shadow: #d0dceb 0 0 0 2px;
-                }
-                &[data-invalid] {
-                    border: 1px solid rgba(#c82829, 1);
-                    box-shadow: none;
-                    &:focus-within {
-                        border-color: #c82829;
-                        outline: none;
-                        box-shadow: #f2cacb 0 0 0 2px !important;
+    .k-multilist-field-column {
+        padding: 0;
+        overflow: visible;
+        .k-field {
+            &:has(:invalid) {
+                .k-input {
+                    &:not(:focus-within) {
+                        background: light-dark(rgba(255, 0, 0, .03), rgba(255, 0, 0, .06));
                     }
                 }
             }
-            .k-text-input {
+        }
+        .k-input {
+            border-radius: 0;
+            box-shadow: none;
+            outline: none;
+            padding: 0 .25rem;
+            &:focus-within {
+                outline: var(--input-outline-focus);
+                z-index: 1;
+            }
+        }
+
+    }
+
+    /* Calendar table reset
+    /* else it inherits the structure styling
+    --------------------------------------------*/
+
+    .k-calendar-table {
+        th {
+            padding-inline: 0;
+            font-family: inherit;
+            color: var(--color-gray-500);
+            font-size: var(--text-xs);
+            background: none;
+        }
+        tbody {
+            tr:last-child th {
+                border-end-start-radius: 0;
+                border-block-end: 0;
+            }
+            tr:first-child th {
+                border-start-start-radius: 0;
+            }
+            th {
+                width: 100%;
+                white-space: normal;
+                overflow: visible;
                 border-radius: 0;
             }
         }
-    }
-
-    /* Fix for structure styles interfering with the calendar styles */
-    .k-calendar-input th,
-    .k-calendar-input td {
-        border: none;
-        background: none !important;
-        overflow: visible;
-    }
-    .k-calendar-input th {
-        position: relative;
-        padding: .5rem 0;
-        height: auto;
-        color: #999;
-        font-size: .75rem;
-        font-weight: 400;
-        text-align: center;
-        line-height: 0;
-    }
-    .k-calendar-today {
-        line-height: 0;
-    }
-}
-
-/* mobile */
-.k-table.k-multilist-table {
-    @media screen and (max-width: $breakpoint-md) {
-        td,
-        th {
-          display: table-cell;
+        thead {
+            th:first-child {
+                border-start-start-radius: 0;
+            }
+            th {
+                position: relative;
+                top: auto;
+                inset-inline: 0;
+                z-index: 1;
+            }
         }
-        th:first-child,
-        th:nth-child(2),
-        th:last-child,
-        td:first-child,
-        td:nth-child(2),
-        td:last-child {
-          display: table-cell;
+        tbody tr td,
+        tfoot tr td {
+            background: none;
+        }
+        tr:not(:last-child){
+            td {
+                border-block-end: none;
+            }
+        }
+        .k-calendar-today {
+            border-block-end: none;
+        }
+        th, td {
+            padding-inline: 0;
+            height: auto;
+            overflow: visible;
+            text-overflow: inherit;
+            width: 100%;
+            border-inline-end: none;
+            line-height: 1;
+            border-block-end: none;
         }
     }
 }

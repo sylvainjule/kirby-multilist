@@ -1,237 +1,212 @@
 <template>
-    <k-field v-bind="$props" class="k-multilist-field">
-        <template slot="options">
-            <k-button v-if="canAdd" :id="_uid" icon="add" @click="addItem">
-                {{ $t('add') }}
-            </k-button>
+    <!-- <same> -->
+    <k-field v-bind="$props" class="k-structure-field" @click.native.stop>
+        <template v-if="hasFields && !disabled" #options>
+            <k-button-group layout="collapsed">
+                <k-button :autofocus="autofocus" :disabled="!more" :responsive="true" :text="$t('add')"
+                          icon="add" variant="filled" size="xs" @click="add()" />
+                <k-button icon="dots" size="xs" variant="filled" @click="$refs.options.toggle()" />
+                <k-dropdown-content ref="options" :options="[
+                        {
+                            click: () => add(),
+                            disabled: !more,
+                            icon: 'add',
+                            text: $t('add')
+                        },
+                        {
+                            click: () => removeAll(),
+                            disabled: items.length === 0 || disabled,
+                            icon: 'trash',
+                            text: $t('delete.all')
+                        }
+                    ]" align-x="end" />
+            </k-button-group>
         </template>
 
-        <k-empty v-if="isEmpty" icon="list-bullet" @click="addItem">
-            {{ empty || $t("field.structure.empty") }}
-        </k-empty>
-        <div v-else class="k-table k-multilist-table">
-            <table :data-sortable="isSortable">
-                <thead>
-                    <tr>
-                        <th class="k-table-index-column" data-mobile="true">#</th>
-                        <th v-for="(column, columnName) in columns" :key="index" class="k-table-column" :style="'width:' + width(fields[columnName].width)" :data-mobile="column.mobile">
-                            {{ fields[columnName].label }}<span v-if="fields[columnName].required">*</span>
-                        </th>
-                        <th class="k-table-options-column" data-mobile="true"></th>
-                    </tr>
-                </thead>
+        <k-input-validator v-bind="{ min, max, required }" :value="JSON.stringify(items)">
+            <template v-if="hasFields">
+                <k-empty v-if="items.length === 0" icon="list-bullet" @click="add()">
+                    {{ empty ?? $t("field.structure.empty") }}
+                </k-empty>
 
-                <k-draggable :list="localValue" :handle="true" element="tbody" class="k-multilist-list" :options="dragOptions" @end="onInput">
-                    <tr v-for="(item, index) in localValue" :key="index" class="k-multilist-item">
-                        <td :class="['k-table-index-column', {'disabled': isLast(index) }]" :data-sortable="isSortable && !isLast(index)" data-mobile="true">
-                            <div class="k-table-index">{{ index + 1 }}</div>
-                            <k-sort-handle v-if="isSortable && !isLast(index)" />
-                        </td>
+                <template v-else>
+                <!-- </same> -->
 
-                        <td v-for="(column, columnName) in columns" :key="columnName" class="k-table-column multilist-field" :data-mobile="column.mobile">
-                            <component
-                                  :is="'k-' + fields[columnName].type + '-field'"
-                                  v-if="hasFieldType(fields[columnName].type)"
-                                  :ref="'list-'+ fields[columnName].name +'-'+ index"
-                                  v-model="localValue[index][columnName]"
-                                  :name="columnName"
-                                  :novalidate="novalidate"
-                                  :disabled="disabled"
-                                  v-bind="fields[columnName]"
-                                  @keydown.shift.enter.prevent="addItem"
-                                  @keyup="onKeyup(index, columnName, fields[columnName], $event)"
-                                  @input="onColumnInput(index, columnName, $event)"
-                                />
-                        </td>
+                    <k-multilist-table
+                        :columns="columns"
+                        :disabled="disabled"
+                        :fields="fields"
+                        :empty="$t('field.structure.empty')"
+                        :index="index"
+                        :options="options"
+                        :pagination="limit ? pagination : false"
+                        :rows="paginatedItems"
+                        :sortable="isSortable"
+                        :value="paginatedItems"
+                        ref="multilist-table"
+                        @cell="open($event.row, $event.columnIndex)"
+                        @input="onTableInput"
+                        @option="option"
+                        @paginate="paginate" />
 
-                        <td :class="['k-table-options-column', {'disabled': isLast(index) }]" data-mobile="true">
-                            <k-button
-                              :tooltip="$t('remove')"
-                              class="k-table-options-button"
-                              icon="remove"
-                              @click="removeItem(index)"
-                            />
-                        </td>
-                    </tr>
-                </k-draggable>
-            </table>
-        </div>
+                    <!-- <same> -->
+                    <footer v-if="more">
+                        <k-button :title="$t('add')" icon="add" size="xs" variant="filled" @click="add()" />
+                    </footer>
+                </template>
+            </template>
+
+            <template v-else>
+                <k-empty icon="list-bullet">{{ $t("fields.empty") }}</k-empty>
+            </template>
+        </k-input-validator>
     </k-field>
+    <!-- </same> -->
 </template>
 
 <script>
 export default {
-    props: {
-        columns: Object,
-        label: String,
-        disabled: Boolean,
-        help: String,
-        parent: String,
-        empty: String,
-        name: [String, Number],
-        required: Boolean,
-        type: String,
-
-        duplicate: {
-            type: Boolean,
-            default: true
-        },
-        empty: String,
-        fields: Object,
-        limit: Number,
-        max: Number,
-        min: Number,
-        prepend: {
-            type: Boolean,
-            default: false
-        },
-        sortable: {
-            type: Boolean,
-            default: true
-        },
-        sortBy: String,
-        value: {
-            type: Array,
-            default() {
-                return [];
-            }
-        },
-    },
+    extends: 'k-structure-field',
     data() {
         return {
-            novalidate: false,
-            localValue: this.value
+            needsItemsSync: false,
+            skipSort: false
         }
     },
-    watch: {
-        value: function(value) {
-            if(this.localValue !== value) {
-                this.localValue = this.sort(value)
-            }
-        },
-    },
-    computed: {
-        isEmpty() {
-            return !this.localValue || !this.localValue.length
-        },
-        canAdd() {
-            return !this.limit || !this.localValue || !this.localValue.length || this.localValue.length < this.limit
-        },
-        isSortable() {
-            return this.sortable && this.localValue.length > 1 && (!this.sortBy || !this.sortBy.length)
-        },
-        defaultItem() {
-            let data = {}
-
-            Object.keys(this.fields).forEach(fieldName => {
-                const field = this.fields[fieldName]
-                if (field.default !== null && field.default !== undefined) {
-                    data[fieldName] = this.$helper.clone(field.default)
-                } else {
-                    data[fieldName] = null
-                }
-            })
-
-            return data
-        },
-        dragOptions() {
-            return {
-                disabled: !this.isSortable,
-                fallbackClass: "k-table-row-fallback",
-                ghostClass: "k-table-row-ghost"
-            }
-        },
-        lastIndex() {
-            return this.localValue.length - 1
-        },
-    },
     methods: {
-        addItem(focus = true) {
-            let newItem = this.defaultItem
-
-            if(this.prepend) {
-                this.localValue = [newItem].concat(this.localValue)
-            }
-            else {
-                this.localValue.push(newItem)
+        add(value = null) {
+            // ↓ same
+            if (this.more === false) {
+                return false;
             }
 
-            this.onInput()
-            if(focus) {
-                this.$nextTick(() => { this.setFocus() })
-            }
-        },
-        setFocus() {
-            let index   = this.prepend && !this.autoAdd ? 0 : this.lastIndex
-            let ref     = 'list-'+ Object.keys(this.columns)[0] +'-'+ index
-            let focusOn = this.$refs[ref]
+            value = value ?? this.$helper.field.form(this.fields);
 
-            if(focusOn) focusOn[0].focus()
-        },
-        removeItem(index) {
-            if(this.localValue.indexOf(index)) {
-                this.localValue.splice(index, 1)
-            }
-            this.onInput()
-        },
-        onColumnInput(index, key, value) {
-            this.localValue[index][key] = value
+            // add a unique id, if it's not already defined
+            value._id = value._id ?? this.$helper.uuid();
 
-            this.onInput()
-        },
-        onInput() {
-            this.$emit('input', this.localValue)
-        },
-        onKeyup(index, key, field, event) {
-            let changeFocus = false
-            const checkUpDown = ['text', 'url', 'email', 'tel'].indexOf(field.type) > -1
-            const checkLeftRight = ['number', 'select', 'multiselect'].indexOf(field.type) > -1
-            const checkLeftRightWithCaret = ['text', 'url', 'email', 'tel'].indexOf(field.type) > -1
-            const caretAtStart = event.target.selectionStart == 0
-            const caretAtEnd = event.target.selectionStart == event.target.value.length
-
-            if(checkUpDown && (event.key == 'ArrowDown' || event.key == 'ArrowUp')) {
-                index += event.key == 'ArrowDown' ? 1 : -1
-                changeFocus = true
+            if (this.prepend === true) {
+                this.items.unshift(value);
+            } else {
+                this.items.push(value);
             }
 
-            if(event.key == 'ArrowLeft' && (checkLeftRight || checkLeftRightWithCaret && caretAtStart) ||
-               event.key == 'ArrowRight' && (checkLeftRight || checkLeftRightWithCaret && caretAtEnd) ) {
-                let keys = Object.keys(this.fields)
-                key = keys[keys.indexOf(key) + (event.key == 'ArrowRight' ? 1 : -1)]
-                changeFocus = true
+            this.save();
+            // ↑ same
+
+            this.setFocus(value)
+        },
+        onTableInput(values) {
+            // keep the existing _id
+            var valuesArray = Object.values(values).map((item, index) => {
+                const originalItem = this.items[index];
+                return {
+                    ...item,
+                    _id: item._id || (originalItem && originalItem._id) || this.$helper.uuid()
+                };
+            });
+
+            this.value = valuesArray
+
+            if (this.limit) {
+                valuesArray = this.items.toSpliced(
+                    this.pagination.offset,
+                    this.limit,
+                    ...valuesArray
+                );
             }
 
-            if(changeFocus) {
-                let ref = 'list-'+ key +'-'+ index
-                let focusOn = this.$refs[ref]
-
-                if(focusOn && focusOn[0]) focusOn[0].focus()
+            this.needsItemsSync = true
+            this.save(valuesArray);
+        },
+        open(item, field, replace = false) {
+            // prevent running the toItems methods on first load
+            // else drawer wouldn't open
+            if (this.needsItemsSync) {
+                this.items = this.toItems(this.value)
+                this.needsItemsSync = false
             }
-        },
-        isLast(index) {
-            return this.localValue && this.localValue.length > 1 && index + 1 === this.localValue.length
-        },
-        hasFieldType(type) {
-            return this.$helper.isComponent('k-'+ type +'-field')
-        },
-        sort(items) {
-            if (!this.sortBy) return items
-            return items.sortBy(this.sortBy)
-        },
-        width(fraction) {
-            if (!fraction) { return 'auto' }
-            const parts = fraction.toString().split("/")
-            if (parts.length !== 2) { return 'auto' }
 
-            const a = Number(parts[0])
-            const b = Number(parts[1])
-            const w = parseFloat(100 / b * a, 2).toFixed(2) + '%'
+            // ↓ same
+            const index = this.findIndex(item);
 
-            return w == '100.00%' ? 'auto' : w
+            if (this.disabled === true || index === -1) {
+                return false;
+            }
+
+            this.$panel.drawer.open({
+                component: "k-structure-drawer",
+                id: this.id,
+                props: {
+                    icon: this.icon ?? "list-bullet",
+                    next: this.items[index + 1],
+                    prev: this.items[index - 1],
+                    tabs: {
+                        content: {
+                            fields: this.form(field)
+                        }
+                    },
+                    title: this.label,
+                    value: item
+                },
+                replace: replace,
+                on: {
+                    input: (value) => {
+                        const index = this.findIndex(item);
+
+                        // update the prev/next navigation
+                        this.$panel.drawer.props.next = this.items[index + 1];
+                        this.$panel.drawer.props.prev = this.items[index - 1];
+
+                        this.$set(this.items, index, value);
+                        this.save();
+                    },
+                    next: () => {
+                        this.navigate(item, 1);
+                    },
+                    prev: () => {
+                        this.navigate(item, -1);
+                    },
+                    remove: () => {
+                        this.remove(item);
+                    }
+                }
+            });
+            // ↑ same
         },
+        save(values = this.items) {
+            // use skipSort to prevent live-sorting the table
+            // would cause issues with sortBy option
+            this.skipSort = true
+            this.$emit("input", values);
+        
+            this.$nextTick(() => { this.skipSort = false });
+        },
+        setFocus(value) {
+            let id = value._id
+
+            this.$nextTick(() => { 
+                this.$refs['multilist-table'].$el.querySelector('[data-id="'+ id +'"] input').focus()
+            })
+        },
+        toItems(value) {
+            // ↓ same
+            if (Array.isArray(value) === false) {
+                return [];
+            }
+
+            value = value.map((row) => {
+                return {
+                    _id: row._id ?? this.$helper.uuid(),
+                    ...row
+                };
+            });
+            // ↑ same
+
+            return this.skipSort ? value : this.sort(value);
+        }
     }
-};
+}
 </script>
 
 <style lang="scss">
