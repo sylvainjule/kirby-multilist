@@ -23,7 +23,7 @@ This plugin helps dealing with long lists with multiple fields.
 
 ## 1. Installation
 
-> Kirby 3, 4: up to 1.0.2 (untested). Kirby 5: 1.1.0+
+> Kirby 3, 4: up to 1.0.2 (untested). Kirby 5: 1.1.0+.
 
 Download and copy this repository to ```/site/plugins/multilist```
 
@@ -92,7 +92,7 @@ Use it as you would use a structure field, with either the `->toStructure()` ou 
 
 ## 6. Responsive
 
-The field behaves like any <em>Structure</em> field: on mobile only the first column will be shown. All the fields remain editable through the usual structure drawer.
+The field behaves like any <em>Structure</em> field: on mobile only the first column will be shown. All the fields remain editable in the usual structure drawer.
 
 <br/>
 
