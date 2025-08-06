@@ -2,7 +2,7 @@
 
 This plugin helps dealing with long lists with multiple fields.
 
-![multilist-screenshot](https://user-images.githubusercontent.com/14079751/110128561-3967cd00-7dc7-11eb-96cd-f8522de39f8b.png)
+![multilist-screenshot](https://github.com/user-attachments/assets/fe329324-c0e9-4ac2-98c4-e9c49fddadd6)
 
 <br/>
 
