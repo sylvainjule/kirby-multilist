@@ -1,6 +1,6 @@
 # Kirby Multilist
 
-This plugin helps dealing with long lists with multiple fields.
+This plugin helps dealing with long lists with multiple fields, by allowing to edit some field types (`date`, `select`, `tags`, `text`, etc. → [listed here](#3-field-types)) directly from within a structure table without opening the items drawers. Think of it as an inline `structure` field, or a multi-fields `entries` list.
 
 ![multilist-screenshot](https://github.com/user-attachments/assets/fe329324-c0e9-4ac2-98c4-e9c49fddadd6)
 
