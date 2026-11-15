@@ -23,7 +23,7 @@ This plugin helps dealing with long lists with multiple fields, by allowing to e
 
 ## 1. Installation
 
-> Kirby 3, 4: up to 1.0.2 (untested). Kirby 5: 1.1.0+.
+> Kirby 3, 4: up to 1.0.2 (untested). Kirby 5: 1.1.0. Kirby 6: 2+.
 
 Download and copy this repository to ```/site/plugins/multilist```
 

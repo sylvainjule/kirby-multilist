@@ -21,7 +21,26 @@
                 z-index: 1;
             }
         }
+    }
 
+    td.k-multilist-field-column {
+        > .k-field {
+            margin: 0;
+        }
+    }
+    .k-multilist-fallback {
+        display: block;
+        width: 100%;
+        min-height: 2.4rem;
+        padding: 0.35rem 0.5rem;
+        text-align: start;
+        cursor: pointer;
+    }
+    @media (max-width: 60rem) {
+        th.k-table-column[data-mobile="false"],
+        td.k-multilist-field-column[data-mobile="false"] {
+            display: none;
+        }
     }
 
     /* Calendar table reset

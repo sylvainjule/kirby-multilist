@@ -1,9 +1,13 @@
 <?php
 
-Kirby::plugin('sylvainjule/multilist', array(
+use SylvainJule\Multilist\MultilistField;
+
+load([
+    MultilistField::class => 'lib/MultilistField.php',
+], __DIR__);
+
+Kirby::plugin('sylvainjule/multilist', [
     'fields' => [
-        'multilist' => [
-            'extends' => 'structure',
-        ],
+        'multilist' => MultilistField::class,
     ],
-));
+]);

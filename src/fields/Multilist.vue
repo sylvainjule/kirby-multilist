@@ -1,214 +1,182 @@
 <template>
-    <!-- <same> -->
-    <k-field v-bind="$props" class="k-structure-field" @click.native.stop>
+    <k-field v-bind="$props" :class="['k-structure-field', 'k-multilist-field', $attrs.class]" :input="false" :style="$attrs.style" @click.stop>
         <template v-if="hasFields && !disabled" #options>
-            <k-button-group layout="collapsed">
-                <k-button :autofocus="autofocus" :disabled="!more" :responsive="true" :text="$t('add')"
-                          icon="add" variant="filled" size="xs" @click="add()" />
-                <k-button icon="dots" size="xs" variant="filled" @click="$refs.options.toggle()" />
-                <k-dropdown-content ref="options" :options="[
-                        {
-                            click: () => add(),
-                            disabled: !more,
-                            icon: 'add',
-                            text: $t('add')
-                        },
-                        {
-                            click: () => removeAll(),
-                            disabled: items.length === 0 || disabled,
-                            icon: 'trash',
-                            text: $t('delete.all')
-                        }
-                    ]" align-x="end" />
+            <k-button-group v-if="isSelecting" :buttons="batchEditingButtons" size="xs" variant="filled" />
+            <k-button-group v-else>
+                <k-button v-if="canSelect" v-bind="batchEditingToggle" size="xs" variant="filled"/>
+                <k-button-group layout="collapsed">
+                    <k-button :autofocus="autofocus" :disabled="!more" :responsive="true" :text="$t('add')" icon="add" size="xs" variant="filled" @click="add()" />
+                    <k-button icon="dots" size="xs" variant="filled" @click="$refs.options.toggle()" />
+                    <k-dropdown ref="options" :options="bulkOptions" align-x="end" />
+                </k-button-group>
             </k-button-group>
         </template>
 
         <k-input-validator v-bind="{ min, max, required }" :value="JSON.stringify(items)">
             <template v-if="hasFields">
                 <k-empty v-if="items.length === 0" icon="list-bullet" @click="add()">
-                    {{ empty ?? $t("field.structure.empty") }}
+                    {{ empty ?? $t('field.structure.empty') }}
                 </k-empty>
 
                 <template v-else>
-                <!-- </same> -->
-
                     <k-multilist-table
+                        ref="multilistTable"
                         :columns="columns"
                         :disabled="disabled"
                         :fields="fields"
                         :empty="$t('field.structure.empty')"
                         :index="index"
                         :options="options"
-                        :pagination="limit ? pagination : false"
+                        :pagination="limit && !isSelecting ? pagination : false"
                         :rows="paginatedItems"
-                        :sortable="isSortable"
-                        :value="paginatedItems"
-                        ref="multilist-table"
+                        :selecting="isSelecting"
+                        :sortable="isSortable && !isSelecting"
+                        @add="add()"
                         @cell="open($event.row, $event.columnIndex)"
                         @input="onTableInput"
                         @option="option"
-                        @paginate="paginate" />
+                        @paginate="paginate"
+                        @select="onSelect" />
 
-                    <!-- <same> -->
                     <footer v-if="more">
                         <k-button :title="$t('add')" icon="add" size="xs" variant="filled" @click="add()" />
                     </footer>
                 </template>
             </template>
-
-            <template v-else>
-                <k-empty icon="list-bullet">{{ $t("fields.empty") }}</k-empty>
-            </template>
+            <k-empty v-else icon="list-bullet">{{ $t('fields.empty') }}</k-empty>
         </k-input-validator>
     </k-field>
-    <!-- </same> -->
 </template>
 
 <script>
+import { mergeEditedRows } from '../helpers/rows.mjs';
+
+
 export default {
     extends: 'k-structure-field',
+    inheritAttrs: false,
+    emits: ['input'],
     data() {
         return {
-            needsItemsSync: false,
             skipSort: false
+        };
+    },
+    computed: {
+        bulkOptions() {
+            return [
+                {
+                    click: () => this.add(),
+                    disabled: !this.more,
+                    icon: 'add',
+                    text: this.$t('add')
+                },
+                {
+                    click: () => this.removeAll(),
+                    disabled: this.items.length === 0 || this.disabled,
+                    icon: 'trash',
+                    text: this.$t('delete.all')
+                }
+            ];
         }
     },
     methods: {
         add(value = null) {
-            // ↓ same
-            if (this.more === false) {
-                return false;
-            }
+            if(!this.more) return false;
 
-            value = value ?? this.$helper.field.form(this.fields);
+            const row = {
+                ...(value ?? this.$helper.field.form(this.fields)),
+                _id: value?._id ?? this.$helper.uuid()
+            };
 
-            // add a unique id, if it's not already defined
-            value._id = value._id ?? this.$helper.uuid();
-
-            if (this.prepend === true) {
-                this.items.unshift(value);
+            if(this.prepend) {
+                this.items.unshift(row);
+                if(this.limit) this.page = 1;
             } else {
-                this.items.push(value);
+                this.items.push(row);
+                if(this.limit) this.page = Math.ceil(this.items.length / this.limit);
             }
 
             this.save();
-            // ↑ same
-
-            this.setFocus(value)
+            this.$nextTick(() => this.focusRow(row._id));
+            return true;
         },
-        onTableInput(values) {
-            // keep the existing _id
-            var valuesArray = Object.values(values).map((item, index) => {
-                const originalItem = this.items[index];
-                return {
-                    ...item,
-                    _id: item._id || (originalItem && originalItem._id) || this.$helper.uuid()
-                };
-            });
-
-            this.value = valuesArray
-
-            if (this.limit) {
-                valuesArray = this.items.toSpliced(
-                    this.pagination.offset,
-                    this.limit,
-                    ...valuesArray
-                );
-            }
-
-            this.needsItemsSync = true
-            this.save(valuesArray);
+        focusRow(id) {
+            const root = this.$refs.multilistTable?.$el;
+            if(!root) return;
+            const row = Array.from(root.querySelectorAll('[data-id]'))
+                .find((element) => element.dataset.id === String(id));
+            row?.querySelector('input:not([type="hidden"]), textarea, select, button')?.focus();
+        },
+        onTableInput(editedRows) {
+            const rows = mergeEditedRows(
+                this.items,
+                editedRows,
+                this.limit ? this.pagination.offset : 0,
+                this.limit,
+                () => this.$helper.uuid()
+            );
+            this.items = rows;
+            this.save(rows);
         },
         open(item, field, replace = false) {
-            // prevent running the toItems methods on first load
-            // else drawer wouldn't open
-            if (this.needsItemsSync) {
-                this.items = this.toItems(this.value)
-                this.needsItemsSync = false
-            }
-
-            // ↓ same
             const index = this.findIndex(item);
+            if(this.disabled || index === -1) return false;
 
-            if (this.disabled === true || index === -1) {
-                return false;
-            }
-
+            this.stopSelecting?.();
             this.$panel.drawer.open({
-                component: "k-structure-drawer",
+                component: 'k-structure-drawer',
                 id: this.id,
                 props: {
-                    icon: this.icon ?? "list-bullet",
+                    disabled: this.disabled,
+                    icon: this.icon ?? 'list-bullet',
                     next: this.items[index + 1],
                     prev: this.items[index - 1],
-                    tabs: {
-                        content: {
-                            fields: this.form(field)
-                        }
-                    },
+                    tabs: { content: { fields: this.form(field) } },
                     title: this.label,
                     value: item
                 },
-                replace: replace,
+                replace,
                 on: {
                     input: (value) => {
-                        const index = this.findIndex(item);
-
-                        // update the prev/next navigation
-                        this.$panel.drawer.props.next = this.items[index + 1];
-                        this.$panel.drawer.props.prev = this.items[index - 1];
-
-                        this.$set(this.items, index, value);
+                        const currentIndex = this.findIndex(item);
+                        if(currentIndex === -1) return;
+                        const previous = this.items[currentIndex];
+                        this.items.splice(currentIndex, 1, {
+                            ...value,
+                            _id: previous._id
+                        });
+                        const next = this.items[currentIndex + 1];
+                        const prev = this.items[currentIndex - 1];
+                        this.$panel.drawer.props.next = next;
+                        this.$panel.drawer.props.prev = prev;
                         this.save();
                     },
-                    next: () => {
-                        this.navigate(item, 1);
-                    },
-                    prev: () => {
-                        this.navigate(item, -1);
-                    },
-                    remove: () => {
-                        this.remove(item);
-                    }
+                    next: () => this.navigate(item, 1),
+                    prev: () => this.navigate(item, -1),
+                    remove: () => this.remove(item)
                 }
             });
-            // ↑ same
+            return true;
         },
         save(values = this.items) {
-            // use skipSort to prevent live-sorting the table
-            // would cause issues with sortBy option
-            this.skipSort = true
-            this.$emit("input", values);
-        
-            this.$nextTick(() => { this.skipSort = false });
-        },
-        setFocus(value) {
-            let id = value._id
-
-            this.$nextTick(() => { 
-                this.$refs['multilist-table'].$el.querySelector('[data-id="'+ id +'"] input').focus()
-            })
+            this.skipSort = true;
+            this.$emit('input', values);
+            this.$nextTick(() => {
+                this.skipSort = false;
+            });
         },
         toItems(value) {
-            // ↓ same
-            if (Array.isArray(value) === false) {
-                return [];
-            }
-
-            value = value.map((row) => {
-                return {
-                    _id: row._id ?? this.$helper.uuid(),
-                    ...row
-                };
-            });
-            // ↑ same
-
-            return this.skipSort ? value : this.sort(value);
+            if(!Array.isArray(value)) return [];
+            const rows = value.map((row) => ({
+                ...row,
+                _id: row._id ?? this.$helper.uuid()
+            }));
+            return this.skipSort ? rows : this.sort(rows);
         }
     }
-}
+};
 </script>
 
 <style lang="scss">
-    @import '../assets/css/styles.scss'
+    @import '../assets/css/styles.scss';
 </style>
