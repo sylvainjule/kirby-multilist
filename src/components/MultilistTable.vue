@@ -57,7 +57,7 @@
                     </td>
                     <td data-mobile="true" class="k-table-options-column">
                         <label v-if="selecting" class="k-table-select-checkbox">
-                            <input type="checkbox" :disabled="disabled" @change="$emit('select', row, rowIndex)" />
+                            <input type="checkbox" :disabled="disabled" :checked="selected.includes(row._id)" @change="toggleSelection(row._id)" />
                         </label>
                         <k-options-dropdown
                             v-else-if="!disabled && options?.length"
@@ -89,6 +89,7 @@ export default {
         options: { type: Array, default: () => [] },
         pagination: { type: [Object, Boolean], default: false },
         rows: { type: Array, default: () => [] },
+        selected: { type: Array, default: () => [] },
         selecting: Boolean,
         sortable: Boolean
     },
@@ -168,7 +169,14 @@ export default {
             );
             this.dragRows = rows;
             this.$emit('input', rows);
-        }
+        },
+        toggleSelection(id) {
+            const selected = this.selected.includes(id)
+                ? this.selected.filter(item => item !== id)
+                : [...this.selected, id];
+
+            this.$emit('select', selected);
+        },
     }
 };
 </script>

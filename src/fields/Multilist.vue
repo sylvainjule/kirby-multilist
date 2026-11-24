@@ -12,9 +12,9 @@
             </k-button-group>
         </template>
 
-        <k-input-validator v-bind="{ min, max, required }" :value="JSON.stringify(items)">
+        <k-validator v-bind="{ min, max, required }" :count="items.length">
             <template v-if="hasFields">
-                <k-empty v-if="items.length === 0" icon="list-bullet" @click="add()">
+                <k-empty v-if="items.length === 0" icon="list-bullet" v-on="!disabled ? { click: () => add() } : {}">
                     {{ empty ?? $t('field.structure.empty') }}
                 </k-empty>
 
@@ -23,10 +23,11 @@
                         ref="multilistTable"
                         :columns="columns"
                         :disabled="disabled"
-                        :fields="fields"
+                        :fields="subfields"
                         :empty="$t('field.structure.empty')"
                         :index="index"
                         :options="options"
+                        :selected="selected"
                         :pagination="limit && !isSelecting ? pagination : false"
                         :rows="paginatedItems"
                         :selecting="isSelecting"
@@ -44,7 +45,7 @@
                 </template>
             </template>
             <k-empty v-else icon="list-bullet">{{ $t('fields.empty') }}</k-empty>
-        </k-input-validator>
+        </k-validator>
     </k-field>
 </template>
 
@@ -129,8 +130,8 @@ export default {
                 props: {
                     disabled: this.disabled,
                     icon: this.icon ?? 'list-bullet',
-                    next: this.items[index + 1],
-                    prev: this.items[index - 1],
+                    prev: index > 0,
+                    next: index < this.items.length - 1,
                     tabs: { content: { fields: this.form(field) } },
                     title: this.label,
                     value: item
@@ -145,10 +146,9 @@ export default {
                             ...value,
                             _id: previous._id
                         });
-                        const next = this.items[currentIndex + 1];
-                        const prev = this.items[currentIndex - 1];
-                        this.$panel.drawer.props.next = next;
-                        this.$panel.drawer.props.prev = prev;
+                        
+                        this.$panel.drawer.props.next = currentIndex < this.items.length - 1;
+                        this.$panel.drawer.props.prev = currentIndex > 0;
                         this.save();
                     },
                     next: () => this.navigate(item, 1),
