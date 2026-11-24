@@ -3,7 +3,7 @@
     "description": "Quickly manage lists with multiple fields in Kirby",
     "type": "kirby-plugin",
     "license": "MIT",
-    "version": "2.0.0-beta.1",
+    "version": "2.0.0",
     "authors": [
         {
             "name": "Sylvain Julé",
